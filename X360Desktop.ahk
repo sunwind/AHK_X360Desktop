@@ -1,3 +1,10 @@
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;X360Desktop
+;Author: Ben Baginski
+;Enable the Xbox 360 controller to handle desktop behavior.
+;Thank you Scoov for https://autohotkey.com/board/topic/99405-hoverscroll-verticalhorizontal-scroll-without-focus-scrollwheel-acceleration/page-2
+;Thank you AutoHotKey for https://www.autohotkey.com/docs/scripts/JoystickMouse.htm
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 #Include %A_ScriptDir%
 #Include HoverScroll.ahk
 #MaxHotkeysPerInterval 500
