@@ -1,6 +1,6 @@
 ### X360Desktop
 
-This is the first release of X360 Desktop. This script is an amalgamation of Scoox's "HoverScroll()", AutoHotKey's "Using A Joystick as a Mouse," and my own additions.
+This script is an amalgamation of Scoox's "HoverScroll()", AutoHotKey's "Using A Joystick as a Mouse," and my own additions.
 
 This release contains the following features:
 * Simultaneous coarse and fine grain mouse control.
