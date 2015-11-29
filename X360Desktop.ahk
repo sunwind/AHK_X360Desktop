@@ -16,14 +16,14 @@
 ; Increase the following value to make the mouse cursor move faster; larger = faster:
 ; JoyMultiplier adjusts the left stick speed
 ; JoyMultiplier adjusts the right stick speed
-JoyMultiplier = 0.5
-Joy2Multiplier = 0.2
+JoyMultiplier = 0.2
+Joy2Multiplier = 0.5
 
 ;Miscellaneous
-JoyThreshold = 9 		;Joystick Deadspace, 0-10, may need adjusting
-Joy2Threshold = 9		;Joystick2 Deadspace, 0-10, may need adjusting
+JoyThreshold = 10		;Joystick Deadspace, 0-10, may need adjusting
+Joy2Threshold = 10 		;Joystick2 Deadspace, 0-10, may need adjusting
 TriggerThreshold = 5	;Trigger Deadspace, 0-10 may need adjusting
-AltTabDelay = 7 		;Determines how long the alt-tab dialog stays open
+AltTabDelay = 100			;Determines how long the alt-tab dialog stays open
 InvertYAxis := false	;Inverted Y Axis Flag
 
 ;Button Assignments
@@ -32,6 +32,7 @@ InvertYAxis := false	;Inverted Y Axis Flag
 ButtonLeft = 1			
 ButtonRight = 3			
 ButtonMiddle = 2		
+ButtonAltTab = 4
 ButtonBack = 5			
 ButtonForward = 6		
 ButtonStart = 8
@@ -51,6 +52,7 @@ Hotkey, %JoystickPrefix%%ButtonForward%, ButtonForward
 Hotkey, %JoystickPrefix%%ButtonStart%, ButtonStart
 Hotkey, %JoystickPrefix%%ButtonShift%, ButtonShift
 Hotkey, %JoystickPrefix%%ButtonCtrl%, ButtonCtrl
+Hotkey, %JoystickPrefix%%ButtonAltTab%, ButtonAltTab
 
 ; Calculate the axis displacements that are needed to start moving the cursor:
 JoyThresholdUpper := 50 + JoyThreshold
@@ -65,7 +67,7 @@ else
 SetTimer, WatchJoystick, 10 
 SetTimer, WatchJoy2stick, 10
 SetTimer, WatchScroll, 10
-SetTimer, WatchAltTab, 100
+SetTimer, WatchDPad, 100
 
 ; The subroutines below do not use KeyWait because that would sometimes trap the
 ; WatchJoystick quasi-thread beneath the wait-for-button-up thread, which would
@@ -86,6 +88,21 @@ ButtonMiddle:
 SetMouseDelay, -1  ; Makes movement smoother.
 MouseClick, middle,,, 1, 0, D  ; Hold down the right mouse button.
 SetTimer, WaitForMiddleButtonUp, 10
+return
+
+ButtonAltTab:
+if AltTabTimer = -1 
+{
+	Send {Alt Down}{Tab}
+	AltTabTimer := AltTabDelay
+	SetTimer, WaitForAltTabUp, 10
+}
+else if AltTabTimer > 0
+{
+	Send {Alt Up}
+	SetTimer, WaitForAltTabUp, off
+	AltTabTimer = -1
+}
 return
 
 ButtonShift:
@@ -122,6 +139,17 @@ SetTimer, WaitForMiddleButtonUp, off
 MouseClick, middle,,, 1, 0, U  ; Release the mouse button.
 return
 
+WaitForAltTabUp:
+if AltTabTimer = 0
+{
+	Send {Alt Up}
+	SetTimer, WaitForAltTabUp, off
+	AltTabTimer = -1
+	return
+}
+AltTabTimer -= 1
+return
+
 WaitForShiftButtonUp:
 if GetKeyState(JoystickPrefix . ButtonShift)
 	return  ; The button is still, down, so keep waiting. Otherwise, the button has been released.
@@ -147,6 +175,38 @@ Return
 
 ButtonStart:
 Send {LWin}
+return
+
+ButtonDUp:
+Send {Up}
+if AltTabTimer != -1
+{
+	AltTabTimer := AltTabDelay
+}
+return
+
+ButtonDLeft:
+Send {Left}
+if AltTabTimer != -1
+{
+	AltTabTimer := AltTabDelay
+}
+return
+
+ButtonDDown:
+Send {Down}
+if AltTabTimer != -1
+{
+	AltTabTimer := AltTabDelay
+}
+return
+
+ButtonDRight:
+Send {Right}
+if AltTabTimer != -1
+{
+	AltTabTimer := AltTabDelay
+}
 return
 
 ;Subroutie for left stick
@@ -234,37 +294,26 @@ if ABS(joyz-50) > TriggerThreshold
 }
 return
 
-;Subroutine for window switching.
-WatchAltTab:
-GetKeyState, JoyPOV, %JoystickNumber%JoyPOV
-if 	JoyPOV = -1
-{	
-	if AltTabTimer = 0
-	{
-		Send {Alt Up}	
-		AltTabTimer = -1
-	}
-	else if AltTabTimer > 0
-	{
-		AltTabTimer -= 1
-	}
-}
-else if AltTabTimer = -1 
+WatchDPad:
+GetKeyState, POV, JoyPOV
+if POV = -1
 {
-	Send {Alt Down}{Tab}
-	AltTabTimer :=  AltTabDelay
+	return
 }
-else if JoyPOV = 9000 ;switch window right
+else if POV = 0
 {
-	Send {Right}
-	AltTabTimer := AltTabDelay
+	Gosub, ButtonDUp
 }
-if JoyPOV = 27000 ;switch window left
+else if POV = 27000
 {
-	Send {Left}
-	AltTabTimer := AltTabDelay
+	Gosub, ButtonDLeft
+}
+else if POV = 18000
+{
+	Gosub, ButtonDDown
+}
+else if POV = 9000
+{
+	Gosub, ButtonDRight
 }
 return
-
-
-
